@@ -16,7 +16,8 @@ Instead of providing a definitive medical diagnosis, the system generates health
 
 
 ## Network Diagram
-<img width="253" height="512" alt="unnamed (2)" src="https://github.com/user-attachments/assets/9d660234-ae15-4ef8-b353-d295b9d05a86" />
+<img width="253" height="512" alt="unnamed (2) (1)" src="https://github.com/user-attachments/assets/77411f4f-9bfd-435f-b429-ca5e81ff0dd6" />
+
 
 ## Device Catalog
 ### Arduino Uno R3
