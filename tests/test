@@ -1,0 +1,25 @@
+﻿import smbus
+import time
+
+
+bus = smbus.SMBus(1)
+address = 0x5a
+
+
+def read_temp(reg):
+    data = bus.read_word_data(address, reg)
+    temp = (data * 0.02) - 273.15
+    return temp
+
+
+while True:
+    ambient = read_temp(0x06)
+    object_temp = read_temp(0x07)
+
+
+    print(f"Ambient: {ambient:.2f} °C")
+    print(f"Object: {object_temp:.2f} °C")
+    print("---------------------")
+
+
+    time.sleep(1)

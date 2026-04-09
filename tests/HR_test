@@ -1,0 +1,154 @@
+﻿from smbus2 import SMBus
+import time
+
+
+I2C_BUS = 1
+MAX30102_ADDR = 0x57
+
+
+REG_FIFO_DATA = 0x07
+REG_MODE_CONFIG = 0x09
+REG_SPO2_CONFIG = 0x0A
+REG_LED1_PA = 0x0C
+REG_LED2_PA = 0x0D
+
+
+bus = SMBus(I2C_BUS)
+
+
+def write_reg(reg, value):
+    bus.write_byte_data(MAX30102_ADDR, reg, value)
+
+
+def read_fifo():
+    data = bus.read_i2c_block_data(MAX30102_ADDR, REG_FIFO_DATA, 6)
+    red = (data[0] << 16 | data[1] << 8 | data[2]) & 0x3FFFF
+    ir  = (data[3] << 16 | data[4] << 8 | data[5]) & 0x3FFFF
+    return red, ir
+
+
+# Initialize sensor
+write_reg(REG_MODE_CONFIG, 0x40)
+time.sleep(0.1)
+
+
+write_reg(REG_SPO2_CONFIG, 0x27)  # 100Hz
+write_reg(REG_LED1_PA, 0x24)
+write_reg(REG_LED2_PA, 0x24)
+write_reg(REG_MODE_CONFIG, 0x03)
+
+
+print("Place finger on sensor...")
+
+
+SAMPLE_RATE = 100
+BUFFER_SIZE = 300  # 3 seconds
+
+
+def calculate_bpm(ir_values):
+    avg = sum(ir_values) / len(ir_values)
+    ac_signal = [x - avg for x in ir_values]
+
+
+    peaks = []
+    MIN_DISTANCE = int(0.4 * SAMPLE_RATE)
+    last_peak = -MIN_DISTANCE
+
+
+    amplitude = max(ac_signal) - min(ac_signal)
+    threshold = amplitude * 0.3
+
+
+    for i in range(1, len(ac_signal)-1):
+        if i - last_peak < MIN_DISTANCE:
+            continue
+
+
+        if ac_signal[i] > threshold:
+            if ac_signal[i] > ac_signal[i-1] and ac_signal[i] > ac_signal[i+1]:
+                peaks.append(i)
+                last_peak = i
+
+
+    if len(peaks) > 1:
+        intervals = []
+        for i in range(1, len(peaks)):
+            intervals.append((peaks[i] - peaks[i-1]) / SAMPLE_RATE)
+
+
+        avg_interval = sum(intervals) / len(intervals)
+        bpm = 60 / avg_interval
+
+
+        if 40 <= bpm <= 180:
+            return bpm
+
+
+    return 0
+
+
+def calculate_spo2(red_values, ir_values):
+    red_dc = sum(red_values) / len(red_values)
+    ir_dc = sum(ir_values) / len(ir_values)
+
+
+    red_ac = max(red_values) - min(red_values)
+    ir_ac = max(ir_values) - min(ir_values)
+
+
+    if ir_ac == 0 or ir_dc == 0:
+        return 0
+
+
+    R = (red_ac / red_dc) / (ir_ac / ir_dc)
+    spo2 = 110 - 25 * R
+
+
+    spo2 = max(0, min(100, spo2))
+    return spo2
+
+
+try:
+    while True:
+        red_buffer = []
+        ir_buffer = []
+
+
+        for _ in range(BUFFER_SIZE):
+            red, ir = read_fifo()
+            red_buffer.append(red)
+            ir_buffer.append(ir)
+            time.sleep(1 / SAMPLE_RATE)
+
+
+        # Compute extra values for display
+        red_avg = sum(red_buffer) / len(red_buffer)
+        ir_avg = sum(ir_buffer) / len(ir_buffer)
+
+
+        bpm = calculate_bpm(ir_buffer)
+        spo2 = calculate_spo2(red_buffer, ir_buffer)
+
+
+        red_ac = max(red_buffer) - min(red_buffer)
+        ir_ac = max(ir_buffer) - min(ir_buffer)
+
+
+        latest_red = red_buffer[-1]
+        latest_ir = ir_buffer[-1]
+
+
+        print("\n-----------------------------")
+        if ir_avg < 10000:
+            print("No finger detected")
+            bpm = 0
+            spo2 = 0
+        print(f"Heart Rate: {bpm:.1f} BPM")
+        print(f"SpO2: {spo2:.1f}%")
+        print(f"Latest IR: {latest_ir}")
+        print(f"Latest Red: {latest_red}")
+
+
+except KeyboardInterrupt:
+    print("Stopping...")
+    bus.close()
