@@ -16,6 +16,7 @@ Instead of providing a definitive medical diagnosis, the system generates health
 
 
 ## Network Diagram
+<img width="253" height="512" alt="unnamed (2)" src="https://github.com/user-attachments/assets/9d660234-ae15-4ef8-b353-d295b9d05a86" />
 
 ## Device Catalog
 ### Arduino Uno R3
@@ -71,7 +72,7 @@ QoS level 1: At least once protocol that also allows for reliable information tr
 https://youtu.be/CToSO0z_uk4 
 
 ## Existing Products Comparison
-
+<img width="512" height="196" alt="unnamed (3)" src="https://github.com/user-attachments/assets/827b4791-815b-40f7-826c-92753a7b1162" />
 The chart above shows how our device price compares to the Apple Watch Series 11, Fitbit Charge 6, and Oura Ring 4. Our device costs approximately $45 in hardware, which is roughly 9x cheaper than the Apple Watch Series 11 and 8x cheaper than the Oura Ring 4. While consumer devices offer polished form factors and ecosystem integrations, they do not provide on-demand AI risk classification from raw vitals. Our device fills this gap at a fraction of the cost, making it accessible as a research or proof-of-concept platform.
 Future Improvements
 - Create housing that allows for easier usage of the device
