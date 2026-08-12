@@ -42,7 +42,7 @@ I2C Wire Protocol
 Body temperature monitoring
 
 ## Network Operation
-## Services:
+### Services:
 Google Cloud Compute Engine
 Uses a virtual machine to host MQTT broker
 Runs the trained ML model on received message from MQTT
@@ -68,9 +68,6 @@ MQTT Communication Protocols:
 TLS: encrypts data and provides added security through certification authentication.
 TCP: allows for information to reliably reach the edge and cloud layers.
 QoS level 1: At least once protocol that also allows for reliable information transfer as information is received and acknowledged “at least once.”
-
-## Demo Video
-https://youtu.be/CToSO0z_uk4 
 
 ## Existing Products Comparison
 <img width="512" height="196" alt="unnamed (3)" src="https://github.com/user-attachments/assets/827b4791-815b-40f7-826c-92753a7b1162" />
